@@ -1,28 +1,30 @@
-//Temp code
-const config = {
-    apiBase: "http://localhost:8080/api"
-}
 const session = JSON.parse( atob( Cookies.get("session") ) );
+
+function displayAsideInfo ( node ) {
+
+    var tableBuilder = "";
+
+    for( prop in nodeData.nodes._data[node].info ) {
+        if(nodeData.nodes._data[node].info[prop]) {
+            tableBuilder = tableBuilder + "<tr><th>" + prop + "</th><td>" + nodeData.nodes._data[node].info[prop] + "</td></tr>"
+        }
+
+    }
+    
+    $("#person-info").html($("<tbody></tbody>").html(tableBuilder));
+
+}
 
 
 const nodeClickEvent = function (param) {
 
     if(param.nodes.length > 0) {
 
-        var tableBuilder = "";
-
-        for( prop in nodeData.nodes._data[param.nodes[0]].info ) {
-            if(nodeData.nodes._data[param.nodes[0]].info[prop]) {
-                tableBuilder = tableBuilder + "<tr><th>" + prop + "</th><td>" + nodeData.nodes._data[param.nodes[0]].info[prop] + "</td></tr>"
-            }
-
-        }
-        
-        $("#person-info").html($("<tbody></tbody>").html(tableBuilder));
+        displayAsideInfo( param.nodes[0] );
 
         if (!nodeData.nodes._data[param.nodes[0]].loaded) {
 
-            $.getJSON("http://localhost:8080/api/parents?userId="+ param.nodes[0] +"&generationBack=1", d => {
+            $.getJSON(`${ config.apiBase }/parents?userId=${ param.nodes[0] }&generationBack=1`, d => {
                 
                 var level = nodeData.nodes._data[param.nodes[0]].level + 1;
 
@@ -33,7 +35,7 @@ const nodeClickEvent = function (param) {
                 })
             })
 
-            $.getJSON("http://localhost:8080/api/children?userId="+ param.nodes[0] +"&generationBack=1", d => {
+            $.getJSON(`${ config.apiBase }/children?userId=${ param.nodes[0] }&generationBack=1`, d => {
 
                 var level = nodeData.nodes._data[param.nodes[0]].level - 1;
 
@@ -54,7 +56,7 @@ const nodeClickEvent = function (param) {
 
 }
 
-$.getJSON( `${config.apiBase}/social?socialID=${session.user.id}&provider=${session.user.provider}`, data => {
+$.getJSON( `${ config.apiBase }/social?socialID=${session.user.id}&provider=${session.user.provider}`, data => {
     var container = document.getElementById('tree-holder');
 
     var options = {
@@ -74,6 +76,7 @@ $.getJSON( `${config.apiBase}/social?socialID=${session.user.id}&provider=${sess
             "id": data.PERSON_ID,
             "label": data.FIRST_NAME,
             "group": data.LAST_NAME,
+            "info": data,
             "loaded": false,
             "level": 1
         } ] ),
@@ -82,6 +85,8 @@ $.getJSON( `${config.apiBase}/social?socialID=${session.user.id}&provider=${sess
 
     network = new vis.Network(container, nodeData, options);
     network.on("click", nodeClickEvent);
+
+    displayAsideInfo( data.PERSON_ID )
     
     } )
 

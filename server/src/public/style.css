@@ -22,4 +22,17 @@ aside h3 {
 #person-info {
 	width: 100%;
 }
+#add-button {
+	background-image: url("../images/add.png");
+	background-size: contain;
+    height: 2.5em;
+    width: 2.5em;
+}
+#add-button:hover {
+	background-color:#5cbf2a;
+}
+#add-button:active {
+	position:relative;
+	top:1px;
+}
 

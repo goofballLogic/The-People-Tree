@@ -7,6 +7,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 
+var config = require("./config");
+
 app.set('view engine', 'html');    // use .html extension for templates 
 app.set('layout', 'layout');       // use layout.html as the default layout
 app.enable('view cache');
@@ -24,21 +26,22 @@ app.use( session( {
 } ) );
 
 app.use( ( req, res, next ) => {
-  console.log(new Date().toLocaleTimeString(), req.method, req.url);
-  next();
+    console.log(new Date().toLocaleTimeString(), req.method, req.url);
+    next();
 });
 
 app.get("/", (req, res) => {
-  res.render('login')
+    res.render('login')
 });
 
 app.get('/leaf', (req, res) => {
 
-  if (req.session && req.session.passport ) {
-    res.cookie("session", new Buffer( JSON.stringify( req.session.passport ) ).toString("base64") ).render('index');
-  } else {
-  	res.send("no session");
-  }
+    if (req.session && req.session.passport ) {
+        res.locals = { apiBase: `http://${ config.url }:${ config.port }/api`}
+        res.cookie("session", new Buffer( JSON.stringify( req.session.passport ) ).toString("base64") ).render('index');
+    } else {
+  	    res.redirect("/");
+    }
 
 });
 
@@ -46,7 +49,7 @@ app.use('/api', api);
 
 app.use("/auth", auth);
 
-var server = app.listen(8080, () => {
+var server = app.listen( config.port, () => {
     var host = server.address().address;
     var port = server.address().port;
     console.log("Tree app listening at http://%s:%s", host, port);
